@@ -2,6 +2,7 @@ SHELL := /bin/bash
 
 CLUSTER_NAME := cloud-assignment
 VENV_PYTHON := .venv/bin/python
+TOOLS_STAMP := .venv/.installed
 TRAINING_PYTHON := .venv-training/bin/python
 TRAINING_STAMP := .venv-training/.installed
 SERVICE_TEST_MARKER := .venv-training/.service-test-deps
@@ -9,7 +10,7 @@ SERVICE_IMAGE := cloud-assignment-service:local
 MODEL_VERSION ?= v1
 SUBSET ?=
 
-.PHONY: cluster-up namespaces storage-up storage-bootstrap storage-status worker-image teacher-jobs clean-data task1-evidence test-worker test-training test-service test-kubernetes service-image service-import service-deploy service-status service-down train evaluate-teacher evaluate-untrained evaluate-student evaluate-all quality-gate down
+.PHONY: cluster-up namespaces storage-up storage-bootstrap storage-status worker-image teacher-jobs clean-data task1-evidence test-worker test-training test-service test-kubernetes service-image service-import service-deploy service-status service-down train evaluate-teacher evaluate-untrained evaluate-student evaluate-all quality-gate load-test down
 
 cluster-up:
 	k3d cluster create --config cluster/k3d.yaml
@@ -22,12 +23,13 @@ storage-up: namespaces
 	kubectl apply -f kubernetes/seaweedfs.yaml
 	kubectl -n data rollout status deployment/seaweedfs --timeout=300s
 
-$(VENV_PYTHON): requirements-tools.txt
+$(TOOLS_STAMP): requirements-tools.txt
 	python3 -m venv .venv
 	.venv/bin/python -m pip install --upgrade pip
 	.venv/bin/python -m pip install -r requirements-tools.txt
+	touch $(TOOLS_STAMP)
 
-storage-bootstrap: storage-up $(VENV_PYTHON)
+storage-bootstrap: storage-up $(TOOLS_STAMP)
 	$(VENV_PYTHON) scripts/bootstrap_storage.py
 
 storage-status:
@@ -45,10 +47,10 @@ clean-data:
 	kubectl -n pipeline delete job clean-teacher-data --ignore-not-found
 	kubectl apply -f kubernetes/clean-teacher-data.yaml
 
-task1-evidence: $(VENV_PYTHON)
+task1-evidence: $(TOOLS_STAMP)
 	$(VENV_PYTHON) -m scripts.export_task1_evidence
 
-test-worker:
+test-worker: $(TOOLS_STAMP)
 	$(VENV_PYTHON) -m unittest -v tests.test_worker
 
 $(TRAINING_STAMP): requirements-training.txt
@@ -106,6 +108,9 @@ evaluate-all: evaluate-teacher evaluate-untrained evaluate-student
 
 quality-gate:
 	python3 tools/score.py results/student_$(MODEL_VERSION)_predictions.jsonl data/validation.jsonl --out results/student_$(MODEL_VERSION)_validation.json --min-validity 95
+
+load-test: $(TOOLS_STAMP)
+	$(VENV_PYTHON) -m locust -f tools/locustfile.py --headless --users 4 --spawn-rate 4 --run-time 2m --host http://localhost:8080 --csv results/loadtest
 
 down:
 	k3d cluster delete $(CLUSTER_NAME)
