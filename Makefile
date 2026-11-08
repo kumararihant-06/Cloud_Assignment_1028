@@ -6,7 +6,7 @@ TRAINING_PYTHON := .venv-training/bin/python
 MODEL_VERSION ?= v1
 SUBSET ?=
 
-.PHONY: cluster-up namespaces storage-up storage-bootstrap storage-status worker-image teacher-jobs clean-data test-worker test-training train down
+.PHONY: cluster-up namespaces storage-up storage-bootstrap storage-status worker-image teacher-jobs clean-data test-worker test-training train evaluate-teacher evaluate-untrained evaluate-student evaluate-all quality-gate down
 
 cluster-up:
 	k3d cluster create --config cluster/k3d.yaml
@@ -55,6 +55,20 @@ test-training:
 
 train: $(TRAINING_PYTHON)
 	MODEL_VERSION=$(MODEL_VERSION) SUBSET=$(SUBSET) $(TRAINING_PYTHON) -m training.train
+
+evaluate-teacher: $(TRAINING_PYTHON)
+	OLLAMA_URL=http://127.0.0.1:11434/api/generate $(TRAINING_PYTHON) -m training.evaluate --model teacher
+
+evaluate-untrained: $(TRAINING_PYTHON)
+	$(TRAINING_PYTHON) -m training.evaluate --model untrained
+
+evaluate-student: $(TRAINING_PYTHON)
+	$(TRAINING_PYTHON) -m training.evaluate --model student --version $(MODEL_VERSION)
+
+evaluate-all: evaluate-teacher evaluate-untrained evaluate-student
+
+quality-gate:
+	python3 tools/score.py results/student_predictions.jsonl data/validation.jsonl --out results/student_validation.json --min-validity 95
 
 down:
 	k3d cluster delete $(CLUSTER_NAME)
