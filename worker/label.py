@@ -16,6 +16,9 @@ from worker.common import required_env, s3_client
 
 ROOT = Path(__file__).resolve().parents[1]
 PROMPT_PATH = Path(os.environ.get("PROMPT_PATH", ROOT / "prompts/teacher_prompt.txt"))
+OUTPUT_SCHEMA = json.loads(
+    (ROOT / "data" / "schema.json").read_text(encoding="utf-8")
+)["json_schema"]
 MODEL = os.environ.get("OLLAMA_MODEL", "phi3.5")
 OLLAMA_URL = os.environ.get(
     "OLLAMA_URL", "http://host.k3d.internal:11434/api/generate"
@@ -26,6 +29,8 @@ OUTPUT_PREFIX = os.environ.get("OUTPUT_PREFIX", "teacher")
 CHECKPOINT_EVERY = int(os.environ.get("CHECKPOINT_EVERY", "10"))
 REQUEST_TIMEOUT = int(os.environ.get("OLLAMA_TIMEOUT", "600"))
 MAX_RETRIES = int(os.environ.get("OLLAMA_RETRIES", "3"))
+MAX_NEW_TOKENS = int(os.environ.get("TEACHER_MAX_NEW_TOKENS", "96"))
+CONTEXT_LENGTH = int(os.environ.get("TEACHER_CONTEXT_LENGTH", "1024"))
 
 
 def shard_records(
@@ -45,8 +50,14 @@ def ollama_payload(prompt: str) -> bytes:
         {
             "model": MODEL,
             "prompt": prompt,
+            "format": OUTPUT_SCHEMA,
             "stream": False,
-            "options": {"temperature": 0, "seed": 42},
+            "options": {
+                "temperature": 0,
+                "seed": 42,
+                "num_ctx": CONTEXT_LENGTH,
+                "num_predict": MAX_NEW_TOKENS,
+            },
         }
     ).encode("utf-8")
 

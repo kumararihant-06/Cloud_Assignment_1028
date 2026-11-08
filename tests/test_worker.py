@@ -2,7 +2,7 @@ import json
 import unittest
 
 from worker.clean import clean_records, rejection_reason, verify_coverage
-from worker.label import shard_records
+from worker.label import ollama_payload, shard_records
 
 
 def record(record_id, text, reply):
@@ -20,6 +20,14 @@ class ShardingTests(unittest.TestCase):
         ids = [[item["id"] for item in shard] for shard in shards]
         self.assertEqual(ids[0], ["C0000", "C0003", "C0006", "C0009"])
         self.assertEqual(len({value for shard in ids for value in shard}), 10)
+
+    def test_teacher_payload_fixes_required_settings_and_output_schema(self):
+        payload = json.loads(ollama_payload("prompt"))
+        self.assertEqual(payload["model"], "phi3.5")
+        self.assertEqual(payload["options"]["temperature"], 0)
+        self.assertEqual(payload["options"]["seed"], 42)
+        self.assertEqual(payload["options"]["num_predict"], 96)
+        self.assertFalse(payload["format"]["additionalProperties"])
 
 
 class CleaningTests(unittest.TestCase):
