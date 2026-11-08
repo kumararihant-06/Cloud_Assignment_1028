@@ -1,0 +1,51 @@
+Required Locust run after measured CPU tuning
+=============================================
+
+Measured: 2026-11-08T22:44:22+0530 to 2026-11-08T22:46:22+0530
+Command: make load-test LOADTEST_PREFIX=results/loadtest_optimized LOADTEST_HEADERS_OUT=results/loadtest_optimized_headers.json
+Users: 4
+Spawn rate: 4 users/second
+Duration: 2 minutes
+Request timeout: 30 seconds
+Initial replicas: 2
+HPA range and target: 2-4 replicas, 60% average CPU
+Pod resources: 500m CPU request, 2 CPU limit, 512 MiB memory request, 1 GiB memory limit
+
+Measured Locust results:
+requests: 41
+successes: 39
+failures: 2
+success rate: 95.12%
+failure rate: 4.88%
+requests/second: 0.3437
+average response time: 10649.95 ms
+minimum response time: 4015.26 ms
+maximum response time: 30020.48 ms
+median response time: 8100 ms
+p95 response time: 26000 ms
+
+Successful response headers:
+model version v2: 39/39
+command-parser-87c64dccf-d24wz: 12
+command-parser-87c64dccf-6lqvx: 11
+command-parser-87c64dccf-zp77t: 7
+command-parser-87c64dccf-mrn4t: 9
+
+Measured autoscaling timeline:
+22:44:22: test started with 2 ready replicas
+22:45:06: 4 ready replicas; HPA measured 399%/60%; original pods used 1998m and 2000m CPU
+22:46:22: 4 ready replicas; HPA measured 335%/60%; all four pods actively served traffic
+22:49:29: HPA metric returned to 1%; scale-down toward the two-replica minimum was in progress
+
+Comparison with one-CPU baseline:
+failure rate: 58.82% -> 4.88% (53.94 percentage-point reduction)
+throughput: 0.1451 -> 0.3437 requests/second (2.37x)
+average latency: 25664.33 -> 10649.95 ms (58.50% reduction)
+median latency: 30000 -> 8100 ms (73.00% reduction)
+p95 latency: 30000 -> 26000 ms (13.33% reduction)
+
+Finding: the resource change met a 95% request-success objective and kept p95
+below the supplied 30-second timeout. Two requests timed out during the initial
+two-to-four replica transition, so startup/reconciliation delay remains a
+measured limitation. Pre-warming four replicas would avoid this cold scaling
+window at twice the minimum steady-state replica cost.
