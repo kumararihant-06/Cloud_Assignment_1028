@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Model and training artefacts (publish through object storage/GitHub Releases)
+models/
+*.bin
+*.pt
+*.pth
+*.safetensors
+*.gguf
+*.onnx
+tokenizer.json
+tokenizer.model
+
+# Credentials and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# macOS and editors
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Build and test outputs
+build/
+dist/
+*.egg-info/
+htmlcov/
+.coverage
+
+# Local caches and temporary files
+.cache/
+tmp/
+*.tmp
+*.log
+
