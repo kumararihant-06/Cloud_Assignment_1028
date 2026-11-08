@@ -74,18 +74,18 @@ train: $(TRAINING_STAMP)
 	PYTHONUNBUFFERED=1 MODEL_VERSION=$(MODEL_VERSION) SUBSET=$(SUBSET) $(TRAINING_PYTHON) -m training.train
 
 evaluate-teacher: $(TRAINING_STAMP)
-	OLLAMA_URL=http://127.0.0.1:11434/api/generate $(TRAINING_PYTHON) -m training.evaluate --model teacher
+	PYTHONUNBUFFERED=1 OLLAMA_URL=http://127.0.0.1:11434/api/generate $(TRAINING_PYTHON) -m training.evaluate --model teacher
 
 evaluate-untrained: $(TRAINING_STAMP)
-	$(TRAINING_PYTHON) -m training.evaluate --model untrained
+	PYTHONUNBUFFERED=1 $(TRAINING_PYTHON) -m training.evaluate --model untrained
 
 evaluate-student: $(TRAINING_STAMP)
-	$(TRAINING_PYTHON) -m training.evaluate --model student --version $(MODEL_VERSION)
+	PYTHONUNBUFFERED=1 $(TRAINING_PYTHON) -m training.evaluate --model student --version $(MODEL_VERSION)
 
 evaluate-all: evaluate-teacher evaluate-untrained evaluate-student
 
 quality-gate:
-	python3 tools/score.py results/student_predictions.jsonl data/validation.jsonl --out results/student_validation.json --min-validity 95
+	python3 tools/score.py results/student_$(MODEL_VERSION)_predictions.jsonl data/validation.jsonl --out results/student_$(MODEL_VERSION)_validation.json --min-validity 95
 
 down:
 	k3d cluster delete $(CLUSTER_NAME)

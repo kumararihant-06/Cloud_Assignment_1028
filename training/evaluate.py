@@ -25,8 +25,16 @@ CONFIG = yaml.safe_load((ROOT / "training" / "config.yaml").read_text())
 OUTPUT_NAMES = {
     "teacher": ("teacher_predictions.jsonl", "teacher_validation.json"),
     "untrained": ("untrained_predictions.jsonl", "untrained_validation.json"),
-    "student": ("student_predictions.jsonl", "student_validation.json"),
 }
+
+
+def output_names(model: str, version: str = "v1") -> tuple[str, str]:
+    if model == "student":
+        return (
+            f"student_{version}_predictions.jsonl",
+            f"student_{version}_validation.json",
+        )
+    return OUTPUT_NAMES[model]
 
 
 def validation_records() -> list[dict]:
@@ -83,7 +91,7 @@ def teacher_predictions(records: list[dict]) -> list[dict]:
     for index, record in enumerate(records, 1):
         raw = teacher_reply(template.replace("{{COMMAND}}", record["text"]))
         predictions.append({"id": record["id"], "prediction": raw})
-        print(f"teacher validation: {index}/{len(records)}")
+        print(f"teacher validation: {index}/{len(records)}", flush=True)
     return predictions
 
 
@@ -113,7 +121,7 @@ def causal_predictions(records: list[dict], model_source: str | Path) -> list[di
         new_tokens = generated[0, encoded["input_ids"].shape[1] :]
         raw = tokenizer.decode(new_tokens, skip_special_tokens=True).strip()
         predictions.append({"id": record["id"], "prediction": raw})
-        print(f"model validation: {index}/{len(records)}")
+        print(f"model validation: {index}/{len(records)}", flush=True)
     return predictions
 
 
@@ -154,7 +162,7 @@ def main() -> None:
         predictions = causal_predictions(records, download_student(args.version))
 
     RESULTS.mkdir(exist_ok=True)
-    prediction_name, report_name = OUTPUT_NAMES[args.model]
+    prediction_name, report_name = output_names(args.model, args.version)
     predictions_path = RESULTS / prediction_name
     report_path = RESULTS / report_name
     write_jsonl(predictions_path, predictions)

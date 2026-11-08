@@ -3,10 +3,20 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from training.evaluate import verify_checksum, write_jsonl
+from training.evaluate import output_names, verify_checksum, write_jsonl
 
 
 class EvaluationTests(unittest.TestCase):
+    def test_student_output_names_include_model_version(self):
+        self.assertEqual(
+            output_names("student", "v2"),
+            ("student_v2_predictions.jsonl", "student_v2_validation.json"),
+        )
+        self.assertEqual(
+            output_names("teacher"),
+            ("teacher_predictions.jsonl", "teacher_validation.json"),
+        )
+
     def test_checksum_manifest_is_verified(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
