@@ -1,0 +1,39 @@
+Kubernetes inference optimization verification
+==============================================
+
+Measured at: 2026-11-08T20:56:57+0530
+Endpoint: http://localhost:8080/parse
+Request body: {"text":"what is the weather in london"}
+Model version: v2
+CPU limit: 1 CPU per pod
+Optimization: stop after first balanced JSON object
+
+Rejected configuration: TORCH_THREADS=1
+Observed request seconds: 44.696920, 45.141777, 46.669512, 46.771958,
+22.469933, 23.026220
+Observed mean: 38.129387 seconds
+Note: HPA model-loading contention affected the first four requests, but the
+settled 22-23 second results were still not better than four threads.
+
+Selected controlled configuration: TORCH_THREADS=4, 2 ready replicas
+Measured sequential request results:
+request 1: HTTP 200, 21.169212 seconds
+request 2: HTTP 200, 21.628625 seconds
+request 3: HTTP 200, 18.171516 seconds
+request 4: HTTP 200, 17.437308 seconds
+request 5: HTTP 200, 23.365615 seconds
+request 6: HTTP 200, 25.132316 seconds
+
+Mean latency: 21.150765 seconds
+Minimum latency: 17.437308 seconds
+Maximum latency: 25.132316 seconds
+Requests within 30-second timeout: 6/6
+HTTP 200 responses: 6/6
+Valid response schema: 6/6
+X-Model-Version v2: 6/6
+Serving replicas observed: 2/2
+
+The HPA maximum was temporarily set to two only to isolate per-request runtime
+performance. It was restored from kubernetes/hpa.yaml immediately afterward;
+the final committed range remains two to four replicas. Actual autoscaling is
+measured separately with the supplied Locust workload.

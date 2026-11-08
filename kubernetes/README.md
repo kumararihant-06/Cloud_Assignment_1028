@@ -9,8 +9,10 @@ local 8 GB M1 environment: two replicas, a 250 millicore CPU request, a 1 CPU
 limit, a 512 MiB memory request, and a 1 GiB memory limit. The HPA maintains two
 to four replicas and targets 60% average CPU utilization. Load-test results,
 rather than these assumptions, are used for the final performance findings.
-Each pod uses one PyTorch inference thread to match its one-CPU limit, and
-generation stops as soon as the first balanced JSON object is complete.
+Generation stops as soon as the first balanced JSON object is complete. Four
+PyTorch threads are used because measured testing on the Linux ARM container
+was faster than one thread even with the one-CPU container limit; the measured
+comparison is stored in `results/deployment_optimized.txt`.
 
 Build and deploy:
 

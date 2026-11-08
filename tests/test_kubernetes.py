@@ -32,7 +32,7 @@ class KubernetesManifestTests(unittest.TestCase):
         config = resource_by_kind(self.inference, "ConfigMap")["data"]
         self.assertEqual(config["MODEL_URI"], "s3://models/v2")
         self.assertEqual(config["MODEL_VERSION"], "v2")
-        self.assertEqual(config["TORCH_THREADS"], "1")
+        self.assertEqual(config["TORCH_THREADS"], "4")
         self.assertIn("seaweedfs.data.svc.cluster.local", config["S3_ENDPOINT"])
 
     def test_deployment_has_replicas_probes_resources_and_secret_refs(self):
