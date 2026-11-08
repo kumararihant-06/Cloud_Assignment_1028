@@ -1,0 +1,24 @@
+GitHub Actions verification
+===========================
+
+Repository: https://github.com/kumararihant-06/Cloud_Assignment_1028
+Workflow: CI
+Run: 1
+Commit: cc8adf8fcad1dbaf7ab14b09ca0836b611c1b8a1
+URL: https://github.com/kumararihant-06/Cloud_Assignment_1028/actions/runs/42506761224
+Event: push
+Conclusion: success
+
+Job: secret-scan
+Conclusion: success
+- checkout: success
+- gitleaks/gitleaks-action@v3: success
+
+Job: test
+Conclusion: success
+- dependency installation: success
+- unit and manifest tests: success
+- selected-model quality gate: success
+- network ACL cases: success
+- cost recalculation: success
+- inference container build: success

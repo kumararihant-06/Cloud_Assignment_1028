@@ -12,7 +12,7 @@ SUBSET ?=
 LOADTEST_PREFIX ?= results/loadtest
 LOADTEST_HEADERS_OUT ?= results/loadtest_headers.json
 
-.PHONY: cluster-up namespaces storage-up storage-bootstrap storage-status worker-image teacher-jobs clean-data task1-evidence test-worker test-training test-service test-kubernetes test-cost service-image service-import service-deploy service-status service-down train evaluate-teacher evaluate-untrained evaluate-student evaluate-all quality-gate cost-analysis load-test down
+.PHONY: cluster-up namespaces storage-up storage-bootstrap storage-status worker-image teacher-jobs clean-data task1-evidence test-worker test-training test-service test-kubernetes test-cost test-release service-image service-import service-deploy service-status service-down train evaluate-teacher evaluate-untrained evaluate-student evaluate-all quality-gate cost-analysis release-assets load-test down
 
 cluster-up:
 	k3d cluster create --config cluster/k3d.yaml
@@ -77,6 +77,9 @@ test-kubernetes: $(TRAINING_STAMP)
 test-cost:
 	python3 -m unittest -v tests.test_cost
 
+test-release:
+	python3 -m unittest -v tests.test_release
+
 service-image:
 	docker build --file service/Dockerfile --tag $(SERVICE_IMAGE) .
 
@@ -116,6 +119,9 @@ quality-gate:
 
 cost-analysis:
 	python3 -m scripts.cost
+
+release-assets: $(TRAINING_STAMP)
+	$(TRAINING_PYTHON) -m scripts.prepare_release --version v2
 
 load-test: $(TOOLS_STAMP)
 	LOADTEST_HEADERS_OUT=$(LOADTEST_HEADERS_OUT) $(VENV_PYTHON) -m locust -f tools/locustfile.py --headless --users 4 --spawn-rate 4 --run-time 2m --host http://localhost:8080 --csv $(LOADTEST_PREFIX)
