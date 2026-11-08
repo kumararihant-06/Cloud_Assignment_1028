@@ -1,0 +1,9 @@
+NAME                           STATUS     COMPLETIONS   DURATION   AGE     CONTAINERS   IMAGES                          SELECTOR
+job.batch/clean-teacher-data   Complete   1/1           6s         2m18s   cleaner      cloud-assignment-worker:local   batch.kubernetes.io/controller-uid=8f10517c-c6a5-44f2-a6da-d55fb62f3df5
+job.batch/teacher-worker-0     Complete   1/1           73m        81m     worker       cloud-assignment-worker:local   batch.kubernetes.io/controller-uid=d886b10e-6d9c-4262-b737-e1734fa23873
+job.batch/teacher-worker-1     Complete   1/1           73m        81m     worker       cloud-assignment-worker:local   batch.kubernetes.io/controller-uid=84c31a06-a5ef-433d-bea4-67aad271a902
+
+NAME                           READY   STATUS      RESTARTS   AGE     IP           NODE                            NOMINATED NODE   READINESS GATES
+pod/clean-teacher-data-zd5mb   0/1     Completed   0          2m18s   10.42.0.13   k3d-cloud-assignment-server-0   <none>           <none>
+pod/teacher-worker-0-6ch8r     0/1     Completed   0          81m     10.42.0.11   k3d-cloud-assignment-server-0   <none>           <none>
+pod/teacher-worker-1-9mvvk     0/1     Completed   0          81m     10.42.0.12   k3d-cloud-assignment-server-0   <none>           <none>

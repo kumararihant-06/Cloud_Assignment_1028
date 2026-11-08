@@ -1,0 +1,14 @@
+{
+  "shards": [
+    "teacher/shard-0.jsonl",
+    "teacher/shard-1.jsonl"
+  ],
+  "input_records": 3000,
+  "invalid_json": 0,
+  "wrong_keys": 0,
+  "invalid_intent": 0,
+  "invalid_slot": 153,
+  "duplicates": 49,
+  "records_kept": 2798,
+  "sha256": "1331d0275bd00ee6066eccecf6d2e2c492dd1a51a522563d717ec3fbfeb5f2d8"
+}

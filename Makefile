@@ -9,7 +9,7 @@ SERVICE_IMAGE := cloud-assignment-service:local
 MODEL_VERSION ?= v1
 SUBSET ?=
 
-.PHONY: cluster-up namespaces storage-up storage-bootstrap storage-status worker-image teacher-jobs clean-data test-worker test-training test-service service-image train evaluate-teacher evaluate-untrained evaluate-student evaluate-all quality-gate down
+.PHONY: cluster-up namespaces storage-up storage-bootstrap storage-status worker-image teacher-jobs clean-data task1-evidence test-worker test-training test-service service-image train evaluate-teacher evaluate-untrained evaluate-student evaluate-all quality-gate down
 
 cluster-up:
 	k3d cluster create --config cluster/k3d.yaml
@@ -44,6 +44,9 @@ teacher-jobs: worker-image
 clean-data:
 	kubectl -n pipeline delete job clean-teacher-data --ignore-not-found
 	kubectl apply -f kubernetes/clean-teacher-data.yaml
+
+task1-evidence: $(VENV_PYTHON)
+	$(VENV_PYTHON) -m scripts.export_task1_evidence
 
 test-worker:
 	$(VENV_PYTHON) -m unittest -v tests.test_worker

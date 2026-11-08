@@ -45,4 +45,5 @@ htmlcov/
 tmp/
 *.tmp
 *.log
+!results/*.log
 

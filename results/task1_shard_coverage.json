@@ -1,0 +1,13 @@
+{
+  "expected_records": 3000,
+  "shards": {
+    "teacher/shard-0.jsonl": 1500,
+    "teacher/shard-1.jsonl": 1500
+  },
+  "total_shard_records": 3000,
+  "unique_ids": 3000,
+  "missing_ids": [],
+  "unexpected_ids": [],
+  "duplicate_ids": [],
+  "coverage_valid": true
+}
