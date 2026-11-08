@@ -1,0 +1,21 @@
+Complete v1 CPU training and artifact verification
+==================================================
+
+Measured at: 2026-11-08T17:19:21+0530
+Command: make train MODEL_VERSION=v1
+Status: PASS
+Base model: EleutherAI/pythia-70m
+Training examples: 1500
+Observed process elapsed time: approximately 6 minutes 42 seconds
+Dataset SHA-256: 1331d0275bd00ee6066eccecf6d2e2c492dd1a51a522563d717ec3fbfeb5f2d8
+
+Measured training loss:
+epoch 1: 0.38848999
+epoch 2: 0.19702766
+epoch 3: 0.15469621
+
+SeaweedFS verification:
+objects under s3://models/v1/: 9
+manifest entries verified: 8/8
+version.json training_examples: 1500
+model.safetensors SHA-256: 3606a3fd6912449782f02a8364f8ce21f7da1fb1dcecdde9cfe6601923a6f11a

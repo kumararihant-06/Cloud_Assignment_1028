@@ -158,10 +158,11 @@ def train() -> None:
     )
     optimizer = torch.optim.AdamW(model.parameters(), lr=config["learning_rate"])
     epoch_losses = []
+    progress_interval = max(1, len(loader) // 20)
     for epoch in range(1, int(config["epochs"]) + 1):
         model.train()
         total_loss = 0.0
-        for batch in loader:
+        for batch_index, batch in enumerate(loader, start=1):
             optimizer.zero_grad(set_to_none=True)
             loss = model(**batch).loss
             loss.backward()
@@ -170,15 +171,23 @@ def train() -> None:
             )
             optimizer.step()
             total_loss += loss.item()
+            if batch_index % progress_interval == 0 or batch_index == len(loader):
+                progress = 100 * batch_index / len(loader)
+                running_loss = total_loss / batch_index
+                print(
+                    f"epoch={epoch} batch={batch_index}/{len(loader)} "
+                    f"progress={progress:.1f}% running_loss={running_loss:.6f}",
+                    flush=True,
+                )
         mean_loss = total_loss / len(loader)
         epoch_losses.append((epoch, mean_loss))
-        print(f"epoch={epoch} training_loss={mean_loss:.6f}")
+        print(f"epoch={epoch} training_loss={mean_loss:.6f}", flush=True)
 
     version = config["model_version"]
     loss_filename = "loss.csv" if version == "v1" else f"loss_{version}.csv"
     loss_path = ROOT / "training" / loss_filename
     with loss_path.open("w", newline="", encoding="utf-8") as stream:
-        writer = csv.writer(stream)
+        writer = csv.writer(stream, lineterminator="\n")
         writer.writerow(["epoch", "training_loss"])
         writer.writerows((epoch, f"{loss:.8f}") for epoch, loss in epoch_losses)
 

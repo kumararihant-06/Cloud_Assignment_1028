@@ -71,7 +71,7 @@ service-image:
 	docker build --file service/Dockerfile --tag $(SERVICE_IMAGE) .
 
 train: $(TRAINING_STAMP)
-	MODEL_VERSION=$(MODEL_VERSION) SUBSET=$(SUBSET) $(TRAINING_PYTHON) -m training.train
+	PYTHONUNBUFFERED=1 MODEL_VERSION=$(MODEL_VERSION) SUBSET=$(SUBSET) $(TRAINING_PYTHON) -m training.train
 
 evaluate-teacher: $(TRAINING_STAMP)
 	OLLAMA_URL=http://127.0.0.1:11434/api/generate $(TRAINING_PYTHON) -m training.evaluate --model teacher
