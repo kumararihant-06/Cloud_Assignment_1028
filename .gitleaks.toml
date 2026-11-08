@@ -1,0 +1,4 @@
+title = "Cloud assignment secret scanning"
+
+[extend]
+useDefault = true

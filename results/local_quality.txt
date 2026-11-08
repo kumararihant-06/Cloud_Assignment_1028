@@ -1,0 +1,35 @@
+Local quality and security verification
+=======================================
+
+Measured at: 2026-11-08T23:13:55+0530
+
+Python test discovery:
+command: .venv-training/bin/python -m unittest discover -s tests -v
+result: PASS
+tests: 27/27
+
+Selected-model quality gate:
+command: make quality-gate MODEL_VERSION=v2
+result: PASS
+json_validity: 99.0% (minimum 95.0%)
+
+Network ACL simulator:
+command: python3 tools/nacl_sim.py network/nacl.json network/packets_sample.jsonl --check
+result: PASS
+cases: 6/6
+
+Dependency consistency:
+command: .venv/bin/python -m pip check
+result: PASS (no broken requirements)
+
+Secret scan:
+tool: gitleaks 8.30.1
+command: gitleaks git . --config .gitleaks.toml --redact --no-banner --report-format json --report-path results/gitleaks.json
+result: PASS (no leaks found)
+commits scanned: 22
+bytes scanned: approximately 453776
+report: results/gitleaks.json
+
+CI note: the committed workflow repeats tests, the model quality gate, NACL
+simulation, cost calculation, container build, and a full-history Gitleaks scan
+on GitHub-hosted runners.

@@ -1,0 +1,60 @@
+{
+  "measured_at": "2026-11-08T23:13:55+0530",
+  "objectives": [
+    {
+      "name": "student_json_validity",
+      "comparison": ">=",
+      "target": 95.0,
+      "measured": 99.0,
+      "unit": "percent",
+      "status": "PASS",
+      "threshold_origin": "supplied quality gate",
+      "source": "results/student_v2_validation.json"
+    },
+    {
+      "name": "load_test_success_rate",
+      "comparison": ">=",
+      "target": 95.0,
+      "measured": 95.12,
+      "unit": "percent",
+      "status": "PASS",
+      "threshold_origin": "project-defined service objective",
+      "source": "results/loadtest_optimized_stats.csv"
+    },
+    {
+      "name": "load_test_p95_latency",
+      "comparison": "<",
+      "target": 30.0,
+      "measured": 26.0,
+      "unit": "seconds",
+      "status": "PASS",
+      "threshold_origin": "supplied request timeout",
+      "source": "results/loadtest_optimized_stats.csv"
+    },
+    {
+      "name": "single_pod_recovery_time",
+      "comparison": "<=",
+      "target": 30.0,
+      "measured": 8.0,
+      "unit": "seconds",
+      "status": "PASS",
+      "threshold_origin": "project-defined service objective",
+      "source": "results/reliability.txt"
+    },
+    {
+      "name": "health_success_during_single_pod_loss",
+      "comparison": ">=",
+      "target": 99.0,
+      "measured": 100.0,
+      "unit": "percent of 25 probes",
+      "status": "PASS",
+      "threshold_origin": "project-defined service objective",
+      "source": "results/reliability.txt"
+    }
+  ],
+  "limitations": [
+    "The optimized load test had two timeouts during the initial HPA scale-up window.",
+    "The load-test and pod-loss samples are short local-cluster experiments, not long-duration production observations.",
+    "Pre-warming four replicas would reduce cold-scale risk but doubles the minimum replica cost."
+  ]
+}
