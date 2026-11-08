@@ -1,0 +1,16 @@
+Final report verification
+=========================
+
+File: report/report.pdf
+Verified: 2026-11-09 (Asia/Kolkata)
+Pages: 8
+Page size: A4 (595.276 x 841.890 points)
+Encrypted: no
+PDF version: 1.4
+Extracted text characters: 17,426
+Required headings present: TASK 1, TASK 2, TASK 3, TASK 4, Architecture,
+  Implementation, Measured results, Limitations, Improvements
+Automated tests: 29 passed
+Visual QA: all 8 pages rendered and inspected; no clipping, overlap, broken
+  tables, unreadable text, or blank pages observed
+SHA-256: 8637bbdca028ac54c4230070fb79105f1f83de7cb10a403a8a7158743dff8c63
