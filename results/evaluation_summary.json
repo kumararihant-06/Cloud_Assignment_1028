@@ -1,0 +1,63 @@
+{
+  "measured_at": "2026-11-08T18:10:08+0530",
+  "validation_examples": 100,
+  "models": {
+    "teacher_phi_3_5": {
+      "json_validity": 100.0,
+      "intent_accuracy": 79.0,
+      "date_accuracy": 77.0,
+      "time_accuracy": 85.0,
+      "place_accuracy": 76.0,
+      "full_frame": 40.0,
+      "missing_predictions": 0,
+      "invalid_ids": []
+    },
+    "untrained_pythia_70m": {
+      "json_validity": 0.0,
+      "intent_accuracy": 0.0,
+      "date_accuracy": 0.0,
+      "time_accuracy": 0.0,
+      "place_accuracy": 0.0,
+      "full_frame": 0.0,
+      "missing_predictions": 0,
+      "invalid_output_count": 100
+    },
+    "student_v1": {
+      "json_validity": 97.0,
+      "intent_accuracy": 76.0,
+      "date_accuracy": 75.0,
+      "time_accuracy": 79.0,
+      "place_accuracy": 77.0,
+      "full_frame": 36.0,
+      "missing_predictions": 0,
+      "invalid_ids": ["V039", "V064", "V069"]
+    },
+    "student_v2": {
+      "json_validity": 99.0,
+      "intent_accuracy": 79.0,
+      "date_accuracy": 80.0,
+      "time_accuracy": 89.0,
+      "place_accuracy": 83.0,
+      "full_frame": 46.0,
+      "missing_predictions": 0,
+      "invalid_ids": ["V039"]
+    }
+  },
+  "quality_gate": {
+    "metric": "json_validity",
+    "minimum_percent": 95.0,
+    "selected_model": "student_v2",
+    "measured_percent": 99.0,
+    "status": "PASS"
+  },
+  "selection": {
+    "release_candidate": "v2",
+    "reason": "v2 passed the validity gate, tied the teacher on intent accuracy, and achieved the highest date, time, place, and full-frame accuracy."
+  },
+  "prediction_sha256": {
+    "teacher": "c721ad7009d4db9b8138e88ba14e8829c3d33fc6183b0796b1bdbd3318569320",
+    "untrained": "807e9b0f425b0e0031de59cddd341acdc27b94b76cc47463f382c92a5639c2cd",
+    "student_v1": "9194cab775c720be45476b6fbedadd8199b73e61a55dd306f04c986d1781a05b",
+    "student_v2": "76d63b3c4fd2280d539b5aa183d82e2ebf2fbaf24fede85894bbac496ad1f638"
+  }
+}
