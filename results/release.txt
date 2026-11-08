@@ -1,0 +1,32 @@
+GitHub Release verification
+===========================
+
+Repository: https://github.com/kumararihant-06/Cloud_Assignment_1028
+Release: model-v2
+URL: https://github.com/kumararihant-06/Cloud_Assignment_1028/releases/tag/model-v2
+Target commit: 88a94f497f98edd1a97d6ff761ccb07c79c72d0a
+Draft: false
+Prerelease: false
+Asset count: 10
+Verification date: 2026-11-08 (Asia/Kolkata)
+
+Asset inventory and GitHub-computed SHA-256 digests
+---------------------------------------------------
+config.json                 820 bytes  3106eb5a610585be5d1d4968899c7d401549df582aeda0e94f45d1dfe51107cf
+generation_config.json      111 bytes  488c1a4387cb693f41637aab91d5986221abea9648267cbf729d4ea55153c3c4
+loss.csv                     72 bytes  4dc3a9b7d98f3b19b8d83f5c28ed4bdc0a1a270840a82a303f80c23ef527d9b0
+model.safetensors     281715176 bytes  a1fe3929360f76faa8f769219b4479919305f710a7155c0dafa835ba86b92e8c
+model.sha256                 664 bytes  652f77932156380afb4830c1941aea1a77207c01d9ec55c2e6a5ec38e0376eec
+SHA256SUMS                   743 bytes  fd34dc42a54e95a407becbb99f36112ae83ce6094ee1a508627feb4317695647
+special_tokens_map.json      473 bytes  57491904f8680d4b52ed440f1f7ba48cad1c31ecf3eb453b03484e6ff4723ae8
+tokenizer.json           3564303 bytes  d4c0d99d84af59e9126913fafe5210822963e9a3065ee43e6833b358b0c2f825
+tokenizer_config.json       4846 bytes  3e17d197ebe3c73c4d6a43816d9b9012724a43ea612420f4b167aa9d75240492
+version.json                 381 bytes  76d7cbff6a09250445ddbfd498d9ada3e1eac3afd353e864eb74b1afe1ad75c4
+
+Verification results
+--------------------
+- All 10 assets report state "uploaded" on GitHub.
+- `shasum -a 256 -c SHA256SUMS` reports OK for all nine files listed in the manifest.
+- The local SHA256SUMS digest matches GitHub's server-computed digest.
+- The model asset digest matches the selected v2 training artifact checksum.
+- Model files are release assets only and are excluded from Git by .gitignore.
