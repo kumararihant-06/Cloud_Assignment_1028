@@ -13,7 +13,14 @@ from urllib.parse import urlparse
 import boto3
 from botocore.config import Config
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import (
+    AutoModelForCausalLM,
+    AutoTokenizer,
+    StoppingCriteria,
+    StoppingCriteriaList,
+)
+
+from service.schema import InvalidModelOutput, first_json_object
 
 
 @dataclass(frozen=True)
@@ -22,12 +29,19 @@ class Settings:
     model_version: str
     s3_endpoint: str
     max_new_tokens: int
+    torch_threads: int
     fault_inject: bool
 
     @classmethod
     def from_environment(cls) -> "Settings":
         values = {}
-        for name in ("MODEL_URI", "MODEL_VERSION", "S3_ENDPOINT", "MAX_NEW_TOKENS"):
+        for name in (
+            "MODEL_URI",
+            "MODEL_VERSION",
+            "S3_ENDPOINT",
+            "MAX_NEW_TOKENS",
+            "TORCH_THREADS",
+        ):
             value = os.environ.get(name)
             if not value:
                 raise RuntimeError(f"Required environment variable is not set: {name}")
@@ -35,13 +49,35 @@ class Settings:
         max_new_tokens = int(values["MAX_NEW_TOKENS"])
         if max_new_tokens < 1:
             raise RuntimeError("MAX_NEW_TOKENS must be positive")
+        torch_threads = int(values["TORCH_THREADS"])
+        if torch_threads < 1:
+            raise RuntimeError("TORCH_THREADS must be positive")
         return cls(
             model_uri=values["MODEL_URI"],
             model_version=values["MODEL_VERSION"],
             s3_endpoint=values["S3_ENDPOINT"],
             max_new_tokens=max_new_tokens,
+            torch_threads=torch_threads,
             fault_inject=os.environ.get("FAULT_INJECT", "0") == "1",
         )
+
+
+class CompleteJsonStoppingCriteria(StoppingCriteria):
+    """Stop generation as soon as the first balanced JSON object is complete."""
+
+    def __init__(self, tokenizer, prompt_length: int):
+        self.tokenizer = tokenizer
+        self.prompt_length = prompt_length
+
+    def __call__(self, input_ids, scores, **kwargs) -> bool:
+        raw = self.tokenizer.decode(
+            input_ids[0, self.prompt_length :], skip_special_tokens=True
+        )
+        try:
+            first_json_object(raw)
+        except InvalidModelOutput:
+            return False
+        return True
 
 
 def model_location(uri: str) -> tuple[str, str]:
@@ -126,7 +162,7 @@ class ModelRuntime:
             model = AutoModelForCausalLM.from_pretrained(model_path)
             model.to(torch.device("cpu"))
             model.eval()
-            torch.set_num_threads(max(1, min(4, os.cpu_count() or 1)))
+            torch.set_num_threads(settings.torch_threads)
             self._tokenizer = tokenizer
             self._model = model
             self.ready = True
@@ -142,6 +178,7 @@ class ModelRuntime:
         prompt = f"Command: {text}\nJSON:"
         with self._lock:
             encoded = self._tokenizer(prompt, return_tensors="pt")
+            prompt_length = encoded["input_ids"].shape[1]
             with torch.inference_mode():
                 generated = self._model.generate(
                     **encoded,
@@ -149,8 +186,15 @@ class ModelRuntime:
                     max_new_tokens=max_new_tokens,
                     pad_token_id=self._tokenizer.pad_token_id,
                     eos_token_id=self._tokenizer.eos_token_id,
+                    stopping_criteria=StoppingCriteriaList(
+                        [
+                            CompleteJsonStoppingCriteria(
+                                self._tokenizer, prompt_length
+                            )
+                        ]
+                    ),
                 )
-            new_tokens = generated[0, encoded["input_ids"].shape[1] :]
+            new_tokens = generated[0, prompt_length:]
             return self._tokenizer.decode(
                 new_tokens, skip_special_tokens=True
             ).strip()

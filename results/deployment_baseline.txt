@@ -1,0 +1,31 @@
+Initial Kubernetes inference verification (before early-stop optimization)
+=======================================================================
+
+Measured at: 2026-11-08T20:12:18+0530
+Endpoint: http://localhost:8080/parse
+Request body: {"text":"what is the weather in london"}
+Initial replicas: 2
+HPA bounds and target: 2-4 replicas, 60% CPU
+
+Measured sequential request results:
+request 1: HTTP 200, 31.440676 seconds
+request 2: HTTP 200, 17.481433 seconds
+request 3: HTTP 200, 35.795898 seconds
+request 4: HTTP 200, 38.291663 seconds
+request 5: HTTP 200, 40.990264 seconds
+request 6: HTTP 200, 32.583745 seconds
+
+Mean latency: 32.763947 seconds
+Minimum latency: 17.481433 seconds
+Maximum latency: 40.990264 seconds
+Response schema: valid for all 6 requests
+X-Model-Version: v2 for all 6 requests
+Observed serving replicas: 4
+HPA result: scaled deployment from 2 to 4 replicas
+Observed pod memory after scaling: 382-477 MiB per pod
+
+Finding: generation continued up to the 96-token cap even after producing a
+complete JSON object. Combined with four PyTorch threads competing inside a
+one-CPU container limit, this exceeded the supplied load test's 30-second
+timeout on five of six sequential requests. The follow-up implementation stops
+after the first balanced JSON object and uses one inference thread per pod.

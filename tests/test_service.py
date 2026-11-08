@@ -1,11 +1,12 @@
 import os
+import torch
 import unittest
 from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
 from service.app import create_app
-from service.runtime import Settings, model_location
+from service.runtime import CompleteJsonStoppingCriteria, Settings, model_location
 from service.schema import InvalidModelOutput, first_json_object, validated_output
 
 
@@ -29,11 +30,31 @@ def settings(fault=False):
         model_version="v1",
         s3_endpoint="http://seaweedfs:8333",
         max_new_tokens=96,
+        torch_threads=1,
         fault_inject=fault,
     )
 
 
+class FakeTokenizer:
+    def __init__(self, decoded):
+        self.decoded = decoded
+
+    def decode(self, token_ids, skip_special_tokens=True):
+        return self.decoded
+
+
 class SchemaTests(unittest.TestCase):
+    def test_generation_stops_only_after_balanced_json(self):
+        token_ids = torch.tensor([[10, 11, 12]])
+        incomplete = CompleteJsonStoppingCriteria(
+            FakeTokenizer('{"intent":"weather_query"'), 1
+        )
+        complete = CompleteJsonStoppingCriteria(
+            FakeTokenizer(VALID + " trailing text"), 1
+        )
+        self.assertFalse(incomplete(token_ids, None))
+        self.assertTrue(complete(token_ids, None))
+
     def test_extracts_first_balanced_json_object(self):
         self.assertEqual(first_json_object(f"prefix {VALID} suffix"), VALID)
         self.assertEqual(validated_output(f"prefix {VALID} suffix")["place"], "london")

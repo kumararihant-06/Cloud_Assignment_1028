@@ -8,6 +8,7 @@ data:
   MODEL_VERSION: v2
   S3_ENDPOINT: http://seaweedfs.data.svc.cluster.local:8333
   MAX_NEW_TOKENS: "96"
+  TORCH_THREADS: "1"
   FAULT_INJECT: "0"
 ---
 apiVersion: apps/v1
