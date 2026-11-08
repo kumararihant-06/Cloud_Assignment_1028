@@ -14,6 +14,7 @@ import shutil
 from typing import Any
 
 import boto3
+from boto3.s3.transfer import TransferConfig
 import torch
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import DataLoader, Dataset
@@ -118,9 +119,14 @@ def sha256_manifest(directory: Path) -> str:
 
 def upload_artifacts(directory: Path, version: str) -> None:
     storage = s3_client()
+    transfer = TransferConfig(
+        multipart_threshold=512 * 1024 * 1024,
+        max_concurrency=1,
+        use_threads=False,
+    )
     for path in sorted(item for item in directory.rglob("*") if item.is_file()):
         key = f"{version}/{path.relative_to(directory).as_posix()}"
-        storage.upload_file(str(path), "models", key)
+        storage.upload_file(str(path), "models", key, Config=transfer)
         print(f"Uploaded {path.name} to s3://models/{key}")
 
 

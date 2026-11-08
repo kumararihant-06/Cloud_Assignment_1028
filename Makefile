@@ -57,8 +57,8 @@ $(TRAINING_STAMP): requirements-training.txt
 	$(TRAINING_PYTHON) -m pip install -r requirements-training.txt
 	touch $(TRAINING_STAMP)
 
-test-training:
-	$(VENV_PYTHON) -m unittest -v tests.test_training
+test-training: $(TRAINING_STAMP)
+	$(TRAINING_PYTHON) -m unittest -v tests.test_training
 
 $(SERVICE_TEST_MARKER): $(TRAINING_STAMP) requirements-test.txt service/requirements.txt
 	$(TRAINING_PYTHON) -m pip install -r requirements-test.txt

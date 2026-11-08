@@ -1,7 +1,11 @@
+import tempfile
 import unittest
+from pathlib import Path
+from unittest.mock import Mock, patch
 
 from training.formatting import prompt_for, target_for, training_text
 from training.storage import split_s3_uri
+from training.train import upload_artifacts
 
 
 class TrainingFormattingTests(unittest.TestCase):
@@ -23,6 +27,17 @@ class TrainingFormattingTests(unittest.TestCase):
         )
         with self.assertRaises(ValueError):
             split_s3_uri("https://example.com/train.jsonl")
+
+    def test_model_upload_disables_small_multipart_transfers(self):
+        storage = Mock()
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "model.safetensors"
+            path.write_bytes(b"weights")
+            with patch("training.train.s3_client", return_value=storage):
+                upload_artifacts(Path(directory), "v1")
+        transfer = storage.upload_file.call_args.kwargs["Config"]
+        self.assertEqual(transfer.multipart_threshold, 512 * 1024 * 1024)
+        self.assertFalse(transfer.use_threads)
 
 
 if __name__ == "__main__":

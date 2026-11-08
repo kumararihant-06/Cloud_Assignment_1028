@@ -1,0 +1,30 @@
+CPU training and artifact-upload smoke test
+===========================================
+
+Measured at: 2026-11-08T17:10:16+0530
+Command: make train SUBSET=50 MODEL_VERSION=v1
+Status: PASS
+Base model: EleutherAI/pythia-70m
+Training examples: 50
+Dataset SHA-256: 1331d0275bd00ee6066eccecf6d2e2c492dd1a51a522563d717ec3fbfeb5f2d8
+
+Measured training loss:
+epoch 1: 1.04767134
+epoch 2: 0.28362307
+epoch 3: 0.15942442
+
+SeaweedFS verification:
+objects under s3://models/v1/: 9
+manifest entries verified: 8/8
+v1/config.json
+v1/generation_config.json
+v1/loss.csv
+v1/model.safetensors
+v1/model.sha256
+v1/special_tokens_map.json
+v1/tokenizer.json
+v1/tokenizer_config.json
+v1/version.json
+
+Note: this smoke model is temporary. The complete v1 training run will overwrite
+the v1 objects before evaluation and release packaging.
