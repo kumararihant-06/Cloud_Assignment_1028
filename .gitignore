@@ -4,10 +4,13 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 .venv/
+.venv-training/
 venv/
 
 # Model and training artefacts (publish through object storage/GitHub Releases)
 models/
+training/artifacts/
+training/downloads/
 *.bin
 *.pt
 *.pth

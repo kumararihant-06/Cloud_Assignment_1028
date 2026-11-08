@@ -2,8 +2,11 @@ SHELL := /bin/bash
 
 CLUSTER_NAME := cloud-assignment
 VENV_PYTHON := .venv/bin/python
+TRAINING_PYTHON := .venv-training/bin/python
+MODEL_VERSION ?= v1
+SUBSET ?=
 
-.PHONY: cluster-up namespaces storage-up storage-bootstrap storage-status worker-image teacher-jobs clean-data test-worker down
+.PHONY: cluster-up namespaces storage-up storage-bootstrap storage-status worker-image teacher-jobs clean-data test-worker test-training train down
 
 cluster-up:
 	k3d cluster create --config cluster/k3d.yaml
@@ -41,6 +44,17 @@ clean-data:
 
 test-worker:
 	$(VENV_PYTHON) -m unittest -v tests.test_worker
+
+$(TRAINING_PYTHON): requirements-training.txt
+	python3 -m venv .venv-training
+	$(TRAINING_PYTHON) -m pip install --upgrade pip
+	$(TRAINING_PYTHON) -m pip install -r requirements-training.txt
+
+test-training:
+	$(VENV_PYTHON) -m unittest -v tests.test_training
+
+train: $(TRAINING_PYTHON)
+	MODEL_VERSION=$(MODEL_VERSION) SUBSET=$(SUBSET) $(TRAINING_PYTHON) -m training.train
 
 down:
 	k3d cluster delete $(CLUSTER_NAME)

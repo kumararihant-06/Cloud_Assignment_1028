@@ -1,0 +1,25 @@
+base_model: EleutherAI/pythia-70m
+dataset_uri: s3://datasets/v1/train.jsonl
+max_training_examples: 1500
+seed: 42
+learning_rate: 0.00005
+batch_size: 4
+epochs: 3
+max_sequence_length: 192
+gradient_clip_norm: 1.0
+model_version: v1
+versions:
+  v1: {}
+  v2:
+    seed: 43
+    epochs: 4
+library_versions:
+  python: "3.11"
+  torch: 2.2.2
+  transformers: 4.46.3
+  tokenizers: 0.20.3
+  numpy: 1.26.4
+  safetensors: 0.4.5
+  boto3: 1.35.99
+  pyyaml: 6.0.2
+
