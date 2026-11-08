@@ -9,7 +9,7 @@ SERVICE_IMAGE := cloud-assignment-service:local
 MODEL_VERSION ?= v1
 SUBSET ?=
 
-.PHONY: cluster-up namespaces storage-up storage-bootstrap storage-status worker-image teacher-jobs clean-data task1-evidence test-worker test-training test-service service-image train evaluate-teacher evaluate-untrained evaluate-student evaluate-all quality-gate down
+.PHONY: cluster-up namespaces storage-up storage-bootstrap storage-status worker-image teacher-jobs clean-data task1-evidence test-worker test-training test-service test-kubernetes service-image service-import service-deploy service-status service-down train evaluate-teacher evaluate-untrained evaluate-student evaluate-all quality-gate down
 
 cluster-up:
 	k3d cluster create --config cluster/k3d.yaml
@@ -67,8 +67,27 @@ $(SERVICE_TEST_MARKER): $(TRAINING_STAMP) requirements-test.txt service/requirem
 test-service: $(SERVICE_TEST_MARKER)
 	$(TRAINING_PYTHON) -m unittest -v tests.test_service
 
+test-kubernetes: $(TRAINING_STAMP)
+	$(TRAINING_PYTHON) -m unittest -v tests.test_kubernetes
+
 service-image:
 	docker build --file service/Dockerfile --tag $(SERVICE_IMAGE) .
+
+service-import: service-image
+	k3d image import $(SERVICE_IMAGE) --cluster $(CLUSTER_NAME)
+
+service-deploy: namespaces service-import
+	python3 scripts/apply_s3_secret.py
+	kubectl apply -f kubernetes/inference.yaml
+	kubectl apply -f kubernetes/hpa.yaml
+	kubectl -n app rollout status deployment/command-parser --timeout=300s
+
+service-status:
+	kubectl -n app get deployment,pod,service,ingress,hpa,pdb
+
+service-down:
+	kubectl delete -f kubernetes/hpa.yaml --ignore-not-found
+	kubectl delete -f kubernetes/inference.yaml --ignore-not-found
 
 train: $(TRAINING_STAMP)
 	PYTHONUNBUFFERED=1 MODEL_VERSION=$(MODEL_VERSION) SUBSET=$(SUBSET) $(TRAINING_PYTHON) -m training.train
