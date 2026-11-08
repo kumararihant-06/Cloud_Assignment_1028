@@ -20,6 +20,10 @@ kubectl -n app get deployment,pod,service,ingress,hpa,pdb
 curl http://localhost:8080/readyz
 ```
 
+`make service-deploy` performs a rolling restart after importing the local
+image because the reproducible development tag remains
+`cloud-assignment-service:local` across rebuilds.
+
 The k3d load balancer maps host port 8080 to Traefik on port 80. The startup
 probe allows up to five minutes for model download and initialization. Readiness
 removes a pod from service until its model is available; liveness only checks

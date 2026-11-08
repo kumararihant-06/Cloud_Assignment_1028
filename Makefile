@@ -80,6 +80,7 @@ service-deploy: namespaces service-import
 	python3 scripts/apply_s3_secret.py
 	kubectl apply -f kubernetes/inference.yaml
 	kubectl apply -f kubernetes/hpa.yaml
+	kubectl -n app rollout restart deployment/command-parser
 	kubectl -n app rollout status deployment/command-parser --timeout=300s
 
 service-status:
