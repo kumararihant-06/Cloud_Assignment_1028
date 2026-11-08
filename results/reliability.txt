@@ -1,0 +1,69 @@
+Kubernetes reliability and fault-injection verification
+=======================================================
+
+Measured on: 2026-11-08, Asia/Kolkata
+Model version: v2
+
+Pod-loss recovery
+-----------------
+Initial state: 2/2 ready replicas; HPA 2-4; PDB minAvailable 1
+Deleted pod: command-parser-87c64dccf-6lqvx
+Delete requested: 2026-11-08T22:56:00+0530
+Replacement pod: command-parser-87c64dccf-nrsm2
+Deployment recovered: 2026-11-08T22:56:08+0530
+Measured recovery time: 8 seconds
+Pod restarts: 0
+
+Ingress health probes at two-second intervals:
+22:55:45 probe=1 status=200 seconds=0.016639
+22:55:47 probe=2 status=200 seconds=0.007609
+22:55:49 probe=3 status=200 seconds=0.009598
+22:55:51 probe=4 status=200 seconds=0.005114
+22:55:53 probe=5 status=200 seconds=0.009025
+22:55:55 probe=6 status=200 seconds=0.004995
+22:55:57 probe=7 status=200 seconds=0.006935
+22:55:59 probe=8 status=200 seconds=0.005977
+22:56:01 probe=9 status=200 seconds=0.004980
+22:56:03 probe=10 status=200 seconds=0.009425
+22:56:05 probe=11 status=200 seconds=0.005323
+22:56:07 probe=12 status=200 seconds=0.008116
+22:56:09 probe=13 status=200 seconds=0.009389
+22:56:11 probe=14 status=200 seconds=0.006829
+22:56:13 probe=15 status=200 seconds=0.006882
+22:56:15 probe=16 status=200 seconds=0.007196
+22:56:17 probe=17 status=200 seconds=0.009908
+22:56:19 probe=18 status=200 seconds=0.005575
+22:56:21 probe=19 status=200 seconds=0.008798
+22:56:23 probe=20 status=200 seconds=0.005402
+22:56:25 probe=21 status=200 seconds=0.005541
+22:56:27 probe=22 status=200 seconds=0.005096
+22:56:29 probe=23 status=200 seconds=0.007096
+22:56:31 probe=24 status=200 seconds=0.006863
+22:56:34 probe=25 status=200 seconds=0.005711
+
+Result: 25/25 probes returned HTTP 200; no ingress downtime was observed.
+
+Malformed model-output fault injection
+--------------------------------------
+Method: temporarily set FAULT_INJECT=1 on the Deployment and wait for its
+rolling update; remove the override and wait for a second rolling update after
+the test.
+
+Injected response:
+HTTP status: 500
+Response time: 14.220047 seconds
+Content-Type: application/json
+Body: {"error":"invalid_model_output"}
+
+Restored response:
+HTTP status: 200
+Response time: 13.472437 seconds
+X-Model-Version: v2
+X-Served-By: command-parser-87c64dccf-2vmq4
+Body: {"intent":"weather_query","date":null,"time":null,"place":"london"}
+
+Final verification at 2026-11-08T22:59:02+0530:
+Deployment ready: 4/4 while HPA completed post-test reconciliation
+HPA bounds: 2-4 replicas
+PDB minAvailable: 1
+FAULT_INJECT Deployment override: absent
