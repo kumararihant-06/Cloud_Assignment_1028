@@ -1,0 +1,33 @@
+Two-CPU resource tuning probe
+=============================
+
+Measured: 2026-11-08T22:27:04+0530 to 2026-11-08T22:27:49+0530
+Purpose: isolate whether two initial replicas can serve four users without
+waiting for HPA scale-up.
+Users: 4
+Spawn rate: 4 users/second
+Duration: 45 seconds
+Replicas fixed at 2 for this controlled probe
+CPU request and limit: 500m request, 2 CPU limit per pod
+Memory request and limit: 512 MiB request, 1 GiB limit per pod
+
+Measured results:
+requests: 8
+successes: 8
+failures: 0
+failure rate: 0.00%
+requests/second: 0.19
+average response time: 17975 ms
+minimum response time: 11372 ms
+maximum response time: 22618 ms
+median response time: 18000 ms
+approximate p95 response time: 23000 ms
+
+Successful response headers:
+model version v2: 8/8
+command-parser-87c64dccf-d24wz: 4
+command-parser-87c64dccf-6lqvx: 4
+
+Decision: select the 500m CPU request and 2 CPU limit, restore the HPA maximum
+to four, and repeat the complete required two-minute workload. This controlled
+probe is tuning evidence, not the final load-test result.

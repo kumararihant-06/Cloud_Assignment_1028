@@ -1,0 +1,39 @@
+Required Locust baseline with one-CPU pod limit
+================================================
+
+Measured: 2026-11-08T22:22:42+0530 to 2026-11-08T22:24:42+0530
+Command: make load-test
+Users: 4
+Spawn rate: 4 users/second
+Duration: 2 minutes
+Request timeout: 30 seconds
+Initial replicas: 2
+HPA range and target: 2-4 replicas, 60% average CPU
+
+Measured Locust results:
+requests: 17
+successes: 7
+failures: 10
+failure rate: 58.82%
+requests/second: 0.1451
+average response time: 25664.33 ms
+minimum response time: 10929.28 ms
+maximum response time: 30019.35 ms
+median response time: 30000 ms
+p95 response time: 30000 ms
+
+Successful response headers:
+model version v2: 7/7
+command-parser-7dfc974579-hlc5s: 2
+command-parser-7dfc974579-rm4kg: 3
+command-parser-7dfc974579-tt52c: 2
+
+Measured autoscaling timeline:
+22:23:02: 2 replicas; pods used 826m and 352m CPU; HPA metric still showed 2%
+22:24:10: 4 ready replicas; HPA measured 224%/60%; original pods used 997m and 999m CPU
+22:25:21: 4 replicas; HPA measured 305%/60%
+
+Finding: the HPA scaled correctly, but its metric/reconciliation and model-startup
+delay meant most early requests timed out. Once four replicas were ready,
+successful latency recovered to as low as 10.93 seconds. This measured baseline
+failed the 30-second reliability target and motivated a two-CPU pod limit.

@@ -42,7 +42,8 @@ class KubernetesManifestTests(unittest.TestCase):
         container = pod["containers"][0]
         for probe in ("startupProbe", "readinessProbe", "livenessProbe"):
             self.assertIn(probe, container)
-        self.assertEqual(container["resources"]["limits"]["cpu"], "1")
+        self.assertEqual(container["resources"]["requests"]["cpu"], "500m")
+        self.assertEqual(container["resources"]["limits"]["cpu"], "2")
         self.assertEqual(container["resources"]["limits"]["memory"], "1Gi")
         secret_names = {
             entry["valueFrom"]["secretKeyRef"]["name"]

@@ -9,6 +9,8 @@ SERVICE_TEST_MARKER := .venv-training/.service-test-deps
 SERVICE_IMAGE := cloud-assignment-service:local
 MODEL_VERSION ?= v1
 SUBSET ?=
+LOADTEST_PREFIX ?= results/loadtest
+LOADTEST_HEADERS_OUT ?= results/loadtest_headers.json
 
 .PHONY: cluster-up namespaces storage-up storage-bootstrap storage-status worker-image teacher-jobs clean-data task1-evidence test-worker test-training test-service test-kubernetes service-image service-import service-deploy service-status service-down train evaluate-teacher evaluate-untrained evaluate-student evaluate-all quality-gate load-test down
 
@@ -110,7 +112,7 @@ quality-gate:
 	python3 tools/score.py results/student_$(MODEL_VERSION)_predictions.jsonl data/validation.jsonl --out results/student_$(MODEL_VERSION)_validation.json --min-validity 95
 
 load-test: $(TOOLS_STAMP)
-	$(VENV_PYTHON) -m locust -f tools/locustfile.py --headless --users 4 --spawn-rate 4 --run-time 2m --host http://localhost:8080 --csv results/loadtest
+	LOADTEST_HEADERS_OUT=$(LOADTEST_HEADERS_OUT) $(VENV_PYTHON) -m locust -f tools/locustfile.py --headless --users 4 --spawn-rate 4 --run-time 2m --host http://localhost:8080 --csv $(LOADTEST_PREFIX)
 
 down:
 	k3d cluster delete $(CLUSTER_NAME)
