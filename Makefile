@@ -3,7 +3,7 @@ SHELL := /bin/bash
 CLUSTER_NAME := cloud-assignment
 VENV_PYTHON := .venv/bin/python
 
-.PHONY: cluster-up namespaces storage-up storage-bootstrap storage-status down
+.PHONY: cluster-up namespaces storage-up storage-bootstrap storage-status worker-image teacher-jobs clean-data test-worker down
 
 cluster-up:
 	k3d cluster create --config cluster/k3d.yaml
@@ -26,6 +26,21 @@ storage-bootstrap: storage-up $(VENV_PYTHON)
 
 storage-status:
 	kubectl -n data get deployment,pod,service,pvc
+
+worker-image:
+	docker build --file worker/Dockerfile --tag cloud-assignment-worker:local .
+	k3d image import cloud-assignment-worker:local --cluster $(CLUSTER_NAME)
+
+teacher-jobs: worker-image
+	kubectl -n pipeline delete job teacher-worker-0 teacher-worker-1 --ignore-not-found
+	kubectl apply -f kubernetes/teacher-workers.yaml
+
+clean-data:
+	kubectl -n pipeline delete job clean-teacher-data --ignore-not-found
+	kubectl apply -f kubernetes/clean-teacher-data.yaml
+
+test-worker:
+	$(VENV_PYTHON) -m unittest -v tests.test_worker
 
 down:
 	k3d cluster delete $(CLUSTER_NAME)
